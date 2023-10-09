@@ -23,6 +23,7 @@ pub struct Question {
     tags: Option<Vec<String>>,
 }
 
+#[allow(unused)]
 impl Question {
     pub fn new(id: QuestionId, title: String, content: String, tags: Option<Vec<String>>) -> Self {
         Question {
