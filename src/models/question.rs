@@ -1,7 +1,10 @@
+use serde::Serialize;
 use std::io::{Error, ErrorKind};
 use std::str::FromStr;
 
-#[derive(Debug)]
+use warp::reject::Reject;
+
+#[derive(Debug, Serialize)]
 pub struct QuestionId(pub String);
 
 impl FromStr for QuestionId {
@@ -14,10 +17,10 @@ impl FromStr for QuestionId {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 #[allow(unused)]
 pub struct Question {
-    id: QuestionId,
+    pub id: QuestionId,
     title: String,
     content: String,
     tags: Option<Vec<String>>,
@@ -34,3 +37,8 @@ impl Question {
         }
     }
 }
+
+// create an empty struct for our error type
+#[derive(Debug)]
+pub struct InvalidId;
+impl Reject for InvalidId {}
