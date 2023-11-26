@@ -1,5 +1,5 @@
-use super::question::Question;
-use super::question::QuestionId;
+use super::question::{Answer, AnswerId, Question, QuestionId};
+
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -16,6 +16,7 @@ impl Store {
     pub fn new() -> Self {
         Store {
             questions: Arc::new(RwLock::new(Self::init())),
+            answers: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 

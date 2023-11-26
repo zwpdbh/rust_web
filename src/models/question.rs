@@ -18,3 +18,13 @@ pub struct Question {
 #[derive(Debug)]
 pub struct InvalidId;
 impl Reject for InvalidId {}
+
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct AnswerId(String);
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Answer {
+    id: AnswerId,
+    content: String,
+    question_id: QuestionId,
+}
