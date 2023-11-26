@@ -11,6 +11,12 @@ curl -X OPTIONS localhost:3030/questions \
 
 # Chapter 04 -- Implement a RESTful API
 
+## Q and A
+
+- Why need to create filter ?
+  - Each HTTP request runs through the filters we setup and adds or modifies the data along the way.
+  - To handle state with Warp, we have to create a filter.
+
 ## Get questions from in-memory
 
 ### How to load json file as in memory data store
@@ -30,6 +36,8 @@ curl -X OPTIONS localhost:3030/questions \
   - The query parameter will be presented as `HashMap<String, String>`.
     - Get the expected key and value.
     - Parse the value from `String` into `usize`.
+- Troubleshooting: `curl localhost:3030/questions?start=1&end=200` only show one pair of keys.
+  - It only shows `params: {"start": "1"}`, where is the rest of query string?
 
 ### Returning custom errors
 

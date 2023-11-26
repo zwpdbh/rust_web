@@ -1,42 +1,32 @@
-// Option01: Doesn't need to create extra file mod.rs
-// // Import the question module
-// mod models {
-//     pub mod question;
-// }
-
-// Option02: Create the mod.rs and define pub mod question;
 mod models;
-
-// Use the Question struct and QuestionId type from the question module
-use models::question::{InvalidId, Question, QuestionId};
-
-use std::str::FromStr;
+use models::question::{InvalidId, Question};
+use models::store;
+use std::collections::HashMap;
+use store::Store;
 use warp::{
-    filters::cors::CorsForbidden, http::Method, http::StatusCode, reject::Rejection, reply::Reply,
-    Filter,
+    filters::cors::CorsForbidden, http::Method, http::Response, http::StatusCode,
+    reject::Rejection, reply::Reply, Filter,
 };
 
-async fn get_questions() -> Result<impl warp::Reply, warp::Rejection> {
-    let question = Question::new(
-        //QuestionId("1".to_string()).expect("No id provided"),
-        QuestionId::from_str("1").expect("No id provided"),
-        "First Question".to_string(),
-        "Content of question".to_string(),
-        Some(vec!["faq".to_string()]),
-    );
-
-    match question.id.0.parse::<i32>() {
-        Err(_) => Err(warp::reject::custom(InvalidId)),
-        Ok(_) => Ok(warp::reply::json(&question)),
+async fn get_questions(
+    params: HashMap<String, String>,
+    store: Store,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    if !params.is_empty() {
+        let pagination = store::extract_pagination(params)?;
+        let res: Vec<Question> = store.questions.values().cloned().collect();
+        let res = &res[pagination.start..pagination.end];
+        Ok(warp::reply::json(&res))
+    } else {
+        let res: Vec<Question> = store.questions.values().cloned().collect();
+        Ok(warp::reply::json(&res))
     }
 }
 
 async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
-    if let Some(InvalidId) = r.find() {
-        Ok(warp::reply::with_status(
-            "No valid ID presented".to_string(),
-            StatusCode::UNPROCESSABLE_ENTITY,
-        ))
+    if let Some(error) = r.find::<store::Error>() {
+        let reply = warp::reply::with_status(error.to_string(), StatusCode::RANGE_NOT_SATISFIABLE);
+        Ok(reply)
     } else if let Some(error) = r.find::<CorsForbidden>() {
         Ok(warp::reply::with_status(
             error.to_string(),
@@ -52,9 +42,8 @@ async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
 
 #[tokio::main]
 async fn main() {
-    // let hello = warp::get().map(|| format!("Hello, World!"));
-    // warp::serve(hello).run(([127, 0, 0, 1], 8000)).await;
-
+    let store = store::Store::new();
+    let store_filter = warp::any().map(move || store.clone());
     let cors = warp::cors()
         .allow_any_origin()
         .allow_header("content-type-invalid-one")
@@ -62,7 +51,9 @@ async fn main() {
 
     let get_items = warp::get()
         .and(warp::path("questions"))
-        .and(warp::path::end())
+        // .and(warp::path::end())
+        .and(warp::query::<HashMap<String, String>>())
+        .and(store_filter)
         .and_then(get_questions)
         .recover(return_error);
 
