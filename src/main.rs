@@ -1,7 +1,11 @@
-// Import the question module
-mod models {
-    pub mod question;
-}
+// Option01: Doesn't need to create extra file mod.rs
+// // Import the question module
+// mod models {
+//     pub mod question;
+// }
+
+// Option02: Create the mod.rs and define pub mod question;
+mod models;
 
 // Use the Question struct and QuestionId type from the question module
 use models::question::{InvalidId, Question, QuestionId};
