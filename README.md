@@ -38,6 +38,9 @@ curl -X OPTIONS localhost:3030/questions \
     - Parse the value from `String` into `usize`.
 - Troubleshooting: `curl localhost:3030/questions?start=1&end=200` only show one pair of keys.
   - It only shows `params: {"start": "1"}`, where is the rest of query string?
+  - That is caused by:
+    - before: `.and(store_filter)`
+    - after: `.and(store_filter.clone())`
 
 ### Returning custom errors
 
@@ -73,3 +76,8 @@ curl -X OPTIONS localhost:3030/questions \
   - It's a convenient way to express that you want to pass the error up the call stack unless everything is successful.
 
 ## POST, PUT, and DELETE questions
+
+### POST
+
+- Troubleshooting
+  - why post to `http://localhost:3030/questions` shows `Route not found`?

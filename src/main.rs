@@ -1,27 +1,10 @@
 mod models;
-use models::question::{InvalidId, Question};
-use models::store;
+use models::store::{self, delete_question};
 use std::collections::HashMap;
-use store::Store;
 use warp::{
-    filters::cors::CorsForbidden, http::Method, http::Response, http::StatusCode,
-    reject::Rejection, reply::Reply, Filter,
+    filters::body::BodyDeserializeError, filters::cors::CorsForbidden, http::Method,
+    http::StatusCode, reject::Rejection, reply::Reply, Filter,
 };
-
-async fn get_questions(
-    params: HashMap<String, String>,
-    store: Store,
-) -> Result<impl warp::Reply, warp::Rejection> {
-    if !params.is_empty() {
-        let pagination = store::extract_pagination(params)?;
-        let res: Vec<Question> = store.questions.values().cloned().collect();
-        let res = &res[pagination.start..pagination.end];
-        Ok(warp::reply::json(&res))
-    } else {
-        let res: Vec<Question> = store.questions.values().cloned().collect();
-        Ok(warp::reply::json(&res))
-    }
-}
 
 async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
     if let Some(error) = r.find::<store::Error>() {
@@ -31,6 +14,11 @@ async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
         Ok(warp::reply::with_status(
             error.to_string(),
             StatusCode::FORBIDDEN,
+        ))
+    } else if let Some(error) = r.find::<BodyDeserializeError>() {
+        Ok(warp::reply::with_status(
+            error.to_string(),
+            StatusCode::UNPROCESSABLE_ENTITY,
         ))
     } else {
         Ok(warp::reply::with_status(
@@ -49,14 +37,43 @@ async fn main() {
         .allow_header("content-type-invalid-one")
         .allow_methods(&[Method::PUT, Method::DELETE, Method::GET, Method::POST]);
 
-    let get_items = warp::get()
-        .and(warp::path("questions"))
-        // .and(warp::path::end())
+    let route_for_questions = "questions";
+
+    let get_questions = warp::get()
+        .and(warp::path(route_for_questions))
+        .and(warp::path::end())
         .and(warp::query::<HashMap<String, String>>())
-        .and(store_filter)
-        .and_then(get_questions)
+        .and(store_filter.clone())
+        .and_then(store::get_questions);
+
+    let add_question = warp::post()
+        .and(warp::path(route_for_questions))
+        .and(warp::path::end())
+        .and(store_filter.clone())
+        .and(warp::body::json())
+        .and_then(store::add_question);
+
+    let update_question = warp::put()
+        .and(warp::path(route_for_questions))
+        .and(warp::path::param::<String>())
+        .and(warp::path::end())
+        .and(store_filter.clone())
+        .and(warp::body::json())
+        .and_then(store::update_question);
+
+    let delete_question = warp::delete()
+        .and(warp::path(route_for_questions))
+        .and(warp::path::param::<String>())
+        .and(warp::path::end())
+        .and(store_filter.clone())
+        .and_then(delete_question);
+
+    let routes = get_questions
+        .or(add_question)
+        .or(update_question)
+        .or(delete_question)
+        .with(cors)
         .recover(return_error);
 
-    let routes = get_items.with(cors);
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
