@@ -31,6 +31,11 @@ async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
 #[tokio::main]
 async fn main() {
     let store = store::Store::new();
+    // To handle state with Wrap, we have to create a filter, which holds our store, and pass it to each route we want to access it.
+    // With warp::any, the any filter will match any request, so this statement will match any and all requests.
+    // Call map on the filter to pass a value to the receiving function.
+    // Move means the capture is done by value: move the values into the closure and takes ownership of them.
+    // Now, store_filter could be applied to the route handler.
     let store_filter = warp::any().map(move || store.clone());
     let cors = warp::cors()
         .allow_any_origin()
