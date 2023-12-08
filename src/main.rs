@@ -73,8 +73,17 @@ async fn main() {
         .and(store_filter.clone())
         .and_then(delete_question);
 
+    let add_answer = warp::post()
+        .and(warp::path("answers"))
+        .and(warp::path::end())
+        .and(store_filter.clone())
+        // For application/x-www-form-urlencoded
+        .and(warp::body::form())
+        .and_then(store::add_answer);
+
     let routes = get_questions
         .or(add_question)
+        .or(add_answer)
         .or(update_question)
         .or(delete_question)
         .with(cors)

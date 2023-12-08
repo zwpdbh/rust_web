@@ -6,12 +6,13 @@ use serde::Serialize;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
+use warp::http::StatusCode;
 use warp::reject::Reject;
 
 #[derive(Debug, Clone)]
 pub struct Store {
     pub questions: Arc<RwLock<HashMap<QuestionId, Question>>>,
-    pub answers: Arc<RwLock<HashMap<QuestionId, String>>>,
+    pub answers: Arc<RwLock<HashMap<AnswerId, Answer>>>,
 }
 
 impl Store {
@@ -118,6 +119,23 @@ pub async fn delete_question(
         }
         None => return Err(warp::reject::custom(Error::QuestionNotFound)),
     }
+}
+
+pub async fn add_answer(
+    store: Store,
+    params: HashMap<String, String>,
+) -> Result<impl warp::Reply, warp::Rejection> {
+    let answer = Answer {
+        id: AnswerId("1".to_string()),
+        content: params.get("content").unwrap().to_string(),
+        question_id: QuestionId(params.get("question_id").unwrap().to_string()),
+    };
+    store
+        .answers
+        .write()
+        .await
+        .insert(answer.id.clone(), answer);
+    Ok(warp::reply::with_status("Answer added", StatusCode::OK))
 }
 
 #[allow(dead_code)]
