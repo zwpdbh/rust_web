@@ -1,3 +1,4 @@
+#[allow(unused)]
 use super::question::{Answer, AnswerId, Question, QuestionId};
 
 use serde::Deserialize;
@@ -10,6 +11,7 @@ use warp::reject::Reject;
 #[derive(Debug, Clone)]
 pub struct Store {
     pub questions: Arc<RwLock<HashMap<QuestionId, Question>>>,
+    pub answers: Arc<RwLock<HashMap<QuestionId, String>>>,
 }
 
 impl Store {
