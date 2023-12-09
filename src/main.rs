@@ -11,6 +11,20 @@ use warp::{http::Method, Filter};
 
 #[tokio::main]
 async fn main() {
+    log4rs::init_file("log4rs.yaml", Default::default()).unwrap();
+
+    let log = warp::log::custom(|info| {
+        eprintln!(
+            "{}{}{}{:?} from {} with {:?}",
+            info.method(),
+            info.path(),
+            info.status(),
+            info.elapsed(),
+            info.remote_addr().unwrap(),
+            info.request_headers()
+        );
+    });
+
     let store = store::Store::new();
     // To handle state with Wrap, we have to create a filter, which holds our store, and pass it to each route we want to access it.
     // With warp::any, the any filter will match any request, so this statement will match any and all requests.
@@ -67,6 +81,7 @@ async fn main() {
         .or(add_answer)
         .or(update_question)
         .or(delete_question)
+        .with(log)
         .with(cors)
         .recover(handle_errors::return_error);
 
