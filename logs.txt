@@ -1,7 +1,0 @@
-    Finished dev [unoptimized + debuginfo] target(s) in 0.03s
-     Running `target/debug/rust_web`
-[2023-12-09T07:37:25Z ERROR rust_web] This is an error
-[2023-12-09T07:37:25Z INFO  rust_web] This is info!
-[2023-12-09T07:37:25Z WARN  rust_web] This is a warning!
-[2023-12-09T07:37:25Z INFO  warp::server] Server::run; addr=127.0.0.1:3030
-[2023-12-09T07:37:25Z INFO  warp::server] listening on http://127.0.0.1:3030
