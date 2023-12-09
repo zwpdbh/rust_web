@@ -3,21 +3,27 @@ use crate::types::pagination;
 use crate::types::question::{Question, QuestionId};
 use handle_errors::Error;
 use std::collections::HashMap;
+use tracing::{info, instrument};
 
+#[instrument]
 pub async fn get_questions(
     params: HashMap<String, String>,
     store: Store,
-    id: String,
+    // id: String,
 ) -> Result<impl warp::Reply, warp::Rejection> {
-    log::info!("{} Start querying questions", id);
+    // log::info!("{} Start querying questions", id);
+
+    info!("querying questions");
     if !params.is_empty() {
         let pagination = pagination::extract_pagination(params)?;
-        log::info!("{} Pagination set: {:?}", id, pagination);
+        // log::info!("{} Pagination set: {:?}", id, pagination);
+        info!(pagination = true);
         let res: Vec<Question> = store.questions.read().await.values().cloned().collect();
         let res = &res[pagination.start..pagination.end];
         Ok(warp::reply::json(&res))
     } else {
-        log::info!("{} No pagination used", id);
+        // log::info!("{} No pagination used", id);
+        info!(pagination = false);
         let res: Vec<Question> = store.questions.read().await.values().cloned().collect();
         Ok(warp::reply::json(&res))
     }
