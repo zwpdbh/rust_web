@@ -1,3 +1,42 @@
+# How to speed up crates in China
+
+- Set env by editing `~/.zshrc or ~/.bashrc`
+
+  ```shell
+  export RUSTUP_DIST_SERVER="https://rsproxy.cn"
+  export RUSTUP_UPDATE_ROOT="https://rsproxy.cn/rustup
+  ```
+
+- Set `~/.cargo/config`
+
+  ```toml
+  [source.crates-io]
+  replace-with = 'rsproxy-sparse'
+
+  [source.rsproxy]
+  registry = "https://rsproxy.cn/crates.io-index"
+
+  [source.rsproxy-sparse]
+  registry = "sparse+https://rsproxy.cn/index/"
+
+  [registries.rsproxy]
+  index = "https://rsproxy.cn/crates.io-index"
+
+  [net]
+  git-fetch-with-cli = true
+  ```
+
+# How to upgrade rust
+
+```shell
+rustup update stable
+```
+
+# How to restart rust-analyzer in VSCode
+
+- Open the Command Palette `Ctrl + Shift + P`.
+- Type `rust-analyzer: Restart Server`.
+
 # Chapter 03
 
 ## Testing CORS response

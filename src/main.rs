@@ -5,10 +5,10 @@
 mod routes;
 mod store;
 mod types;
+use handle_errors;
 use std::collections::HashMap;
 use warp::{http::Method, Filter};
-
-mod error;
+// mod error;
 
 #[tokio::main]
 async fn main() {
@@ -69,7 +69,7 @@ async fn main() {
         .or(update_question)
         .or(delete_question)
         .with(cors)
-        .recover(error::return_error);
+        .recover(handle_errors::return_error);
 
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }

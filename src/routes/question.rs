@@ -1,7 +1,7 @@
-use crate::error::Error;
 use crate::store::Store;
 use crate::types::pagination;
 use crate::types::question::{Question, QuestionId};
+use handle_errors::Error;
 use std::collections::HashMap;
 
 pub async fn get_questions(
