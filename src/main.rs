@@ -5,7 +5,6 @@
 mod routes;
 mod store;
 mod types;
-use handle_errors;
 use std::collections::HashMap;
 use warp::{http::Method, Filter};
 // mod error;
