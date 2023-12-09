@@ -1,32 +1,14 @@
-mod models;
-use models::store::{self, delete_question};
+// keypoint: mod vs use
+// The mod keyword tells our compiler the path to a module, and it stores it for future use.
+// The use keyword uses the module and tells the compiler this: a module is available, and here is the path to it so I
+// can use it in this file.
+mod routes;
+mod store;
+mod types;
 use std::collections::HashMap;
-use warp::{
-    filters::body::BodyDeserializeError, filters::cors::CorsForbidden, http::Method,
-    http::StatusCode, reject::Rejection, reply::Reply, Filter,
-};
+use warp::{http::Method, Filter};
 
-async fn return_error(r: Rejection) -> Result<impl Reply, Rejection> {
-    if let Some(error) = r.find::<store::Error>() {
-        let reply = warp::reply::with_status(error.to_string(), StatusCode::RANGE_NOT_SATISFIABLE);
-        Ok(reply)
-    } else if let Some(error) = r.find::<CorsForbidden>() {
-        Ok(warp::reply::with_status(
-            error.to_string(),
-            StatusCode::FORBIDDEN,
-        ))
-    } else if let Some(error) = r.find::<BodyDeserializeError>() {
-        Ok(warp::reply::with_status(
-            error.to_string(),
-            StatusCode::UNPROCESSABLE_ENTITY,
-        ))
-    } else {
-        Ok(warp::reply::with_status(
-            "Route not found".to_string(),
-            StatusCode::NOT_FOUND,
-        ))
-    }
-}
+mod error;
 
 #[tokio::main]
 async fn main() {
@@ -49,14 +31,14 @@ async fn main() {
         .and(warp::path::end())
         .and(warp::query::<HashMap<String, String>>())
         .and(store_filter.clone())
-        .and_then(store::get_questions);
+        .and_then(routes::question::get_questions);
 
     let add_question = warp::post()
         .and(warp::path(route_for_questions))
         .and(warp::path::end())
         .and(store_filter.clone())
         .and(warp::body::json())
-        .and_then(store::add_question);
+        .and_then(routes::question::add_question);
 
     let update_question = warp::put()
         .and(warp::path(route_for_questions))
@@ -64,14 +46,14 @@ async fn main() {
         .and(warp::path::end())
         .and(store_filter.clone())
         .and(warp::body::json())
-        .and_then(store::update_question);
+        .and_then(routes::question::update_question);
 
     let delete_question = warp::delete()
         .and(warp::path(route_for_questions))
         .and(warp::path::param::<String>())
         .and(warp::path::end())
         .and(store_filter.clone())
-        .and_then(delete_question);
+        .and_then(routes::question::delete_question);
 
     let add_answer = warp::post()
         .and(warp::path("answers"))
@@ -79,7 +61,7 @@ async fn main() {
         .and(store_filter.clone())
         // For application/x-www-form-urlencoded
         .and(warp::body::form())
-        .and_then(store::add_answer);
+        .and_then(routes::answer::add_answer);
 
     let routes = get_questions
         .or(add_question)
@@ -87,7 +69,7 @@ async fn main() {
         .or(update_question)
         .or(delete_question)
         .with(cors)
-        .recover(return_error);
+        .recover(error::return_error);
 
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
