@@ -14,8 +14,8 @@ async fn main() {
     log4rs::init_file("log4rs.yaml", Default::default()).unwrap();
 
     let log = warp::log::custom(|info| {
-        eprintln!(
-            "{}{}{}{:?} from {} with {:?}",
+        log::info!(
+            "{} {} {} {:?} from {} with {:?}",
             info.method(),
             info.path(),
             info.status(),
@@ -32,6 +32,9 @@ async fn main() {
     // Move means the capture is done by value: move the values into the closure and takes ownership of them.
     // Now, store_filter could be applied to the route handler.
     let store_filter = warp::any().map(move || store.clone());
+
+    let id_filter = warp::any().map(|| uuid::Uuid::new_v4().to_string());
+
     let cors = warp::cors()
         .allow_any_origin()
         .allow_header("content-type-invalid-one")
@@ -44,6 +47,7 @@ async fn main() {
         .and(warp::path::end())
         .and(warp::query::<HashMap<String, String>>())
         .and(store_filter.clone())
+        .and(id_filter)
         .and_then(routes::question::get_questions);
 
     let add_question = warp::post()
