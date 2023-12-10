@@ -20,3 +20,9 @@ log4rs = "1.0"
 
 tracing = { version = "0.1", features = ["log"] }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+sqlx = { version = "0.5", features = [
+  "runtime-tokio-rustls",
+  "migrate",
+  "postgres",
+] }
