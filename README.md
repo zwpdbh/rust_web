@@ -1,3 +1,15 @@
+# How to speed up Ubuntu package installation in China
+
+- `sudo cp /etc/apt/sources.list /etc/apt/sources.list.backup`
+- `sudo vi /etc/apt/sources.list` to change it content as your need.
+  ```text
+  deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal main restricted universe multiverse
+  deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-updates main restricted universe multiverse
+  deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-backports main restricted universe multiverse
+  deb http://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-security main restricted universe multiverse
+  ```
+- `sudo apt-get update`
+
 # How to speed up crates in China
 
 - Set env by editing `~/.zshrc or ~/.bashrc`
