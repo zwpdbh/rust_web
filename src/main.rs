@@ -5,6 +5,7 @@
 mod routes;
 mod store;
 mod types;
+use sqlx;
 use std::collections::HashMap;
 use tracing_subscriber::fmt::format::FmtSpan;
 use warp::{http::Method, Filter};
@@ -27,9 +28,14 @@ async fn main() {
     // });
     // step1: add the log level
     let log_filter = std::env::var("RUST_LOG")
-        .unwrap_or_else(|_| "practical_rust_book=info,warp=error".to_owned());
+        .unwrap_or_else(|_| "handle_errors=warn,practical_rust_book=info,warp=error".to_owned());
 
     let store = store::Store::new("postgres://postgres:postgres@localhost:5432/rustweb").await;
+    sqlx::migrate!()
+        .run(&store.clone().connection)
+        .await
+        .expect("cannot run migration");
+
     // To handle state with Wrap, we have to create a filter, which holds our store, and pass it to each route we want to access it.
     // With warp::any, the any filter will match any request, so this statement will match any and all requests.
     // Call map on the filter to pass a value to the receiving function.

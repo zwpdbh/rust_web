@@ -23,10 +23,11 @@
 - `sqlx migrate add -r questions_table`
 
   - This will create a migration folder within the place you run this command.
+    - We shoudl run this command in the root of the project. Because later we could use those migration file directly from our source code.
   - Fill the generated two `.sql` files with commands you need. One is `***.up.sql`, another is the `***.down.sql` for reverse operation.
 
 - Execute migration like:
-  `sqlx migrate run --database-url postgres://postgres:postgres@localhost:5432/rustweb --source db/migrations`
+  `sqlx migrate run --database-url postgres://postgres:postgres@localhost:5432/rustweb --source migrations`
 - Execute migrate revert like:
-  `sqlx migrate revert --database-url postgres://postgres:postgres@localhost:5432/rustweb --source db/migrations`
+  `sqlx migrate revert --database-url postgres://postgres:postgres@localhost:5432/rustweb --source migrations`
   - Each revert will trigger the last migration and try to run the `***.down.sql`.
