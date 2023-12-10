@@ -7,7 +7,14 @@ pub struct QuestionId(pub i32);
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Question {
     pub id: QuestionId,
-    title: String,
-    content: String,
-    tags: Option<Vec<String>>,
+    pub title: String,
+    pub content: String,
+    pub tags: Option<Vec<String>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct NewQuestion {
+    pub title: String,
+    pub content: String,
+    pub tags: Option<Vec<String>>,
 }

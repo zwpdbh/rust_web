@@ -9,3 +9,9 @@ pub struct Answer {
     pub content: String,
     pub question_id: QuestionId,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct NewAnswer {
+    pub content: String,
+    pub question_id: QuestionId,
+}

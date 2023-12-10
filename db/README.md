@@ -6,8 +6,8 @@
 # Use PSQL connect to it
 
 - `sudo apt install postgresql-client-common postgresql-client`
-- `PGPASSWORD=postgres psql -h localhost -U postgres -d rust_web`
+- `PGPASSWORD=postgres psql -h localhost -U postgres`
 
 # Use `.sql` file to init tables
 
-- `PGPASSWORD=postgres psql -h localhost -U postgres -d rust_web -f <your_sql_script.sql>`
+- `PGPASSWORD=postgres psql -h localhost -U postgres -d rustweb -f db/init.sql`

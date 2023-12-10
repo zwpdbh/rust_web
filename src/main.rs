@@ -29,7 +29,7 @@ async fn main() {
     let log_filter = std::env::var("RUST_LOG")
         .unwrap_or_else(|_| "practical_rust_book=info,warp=error".to_owned());
 
-    let store = store::Store::new();
+    let store = store::Store::new("postgres://postgres:postgres@localhost:5432/rustweb").await;
     // To handle state with Wrap, we have to create a filter, which holds our store, and pass it to each route we want to access it.
     // With warp::any, the any filter will match any request, so this statement will match any and all requests.
     // Call map on the filter to pass a value to the receiving function.
